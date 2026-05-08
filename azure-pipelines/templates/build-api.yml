@@ -6,7 +6,7 @@ jobs:
       command: buildAndPush
       repository: api-service
       dockerfile: src/api-service/Dockerfile
-      containerRegistry: cloudstream-connection
+      containerRegistry: acr-service-connection
       tags: |
         $(imageTag)
         latest

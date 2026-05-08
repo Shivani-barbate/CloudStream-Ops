@@ -10,12 +10,16 @@ variables:
   imageTag: $(Build.BuildId)
 
 stages:
-- stage: Build
+- stage: BuildAPI
   jobs:
   - template: templates/build-api.yml
+
+- stage: BuildFunction
+  dependsOn: BuildAPI
+  jobs:
   - template: templates/build-function.yml
 
 - stage: Deploy
-  dependsOn: Build
+  dependsOn: BuildFunction
   jobs:
   - template: templates/deploy-aks.yml

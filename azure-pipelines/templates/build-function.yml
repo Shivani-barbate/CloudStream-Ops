@@ -6,7 +6,7 @@ jobs:
       command: buildAndPush
       repository: processor-function
       dockerfile: src/processor-function/Dockerfile
-      containerRegistry: acr-service-connection
+      containerRegistry: cloudstream-connection
       tags: |
         $(imageTag)
         latest

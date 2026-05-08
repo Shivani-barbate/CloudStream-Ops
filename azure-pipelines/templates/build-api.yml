@@ -1,0 +1,12 @@
+jobs:
+- job: BuildAPI
+  steps:
+  - task: Docker@2
+    inputs:
+      command: buildAndPush
+      repository: api-service
+      dockerfile: src/api-service/Dockerfile
+      containerRegistry: acr-service-connection
+      tags: |
+        $(imageTag)
+        latest

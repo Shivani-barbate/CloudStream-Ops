@@ -1,0 +1,21 @@
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  acrName: cloudstreamregz575vqmmnnycg
+  acrLoginServer: cloudstreamregz575vqmmnnycg.azurecr.io
+  imageTag: $(Build.BuildId)
+
+stages:
+- stage: Build
+  jobs:
+  - template: templates/build-api.yml
+  - template: templates/build-function.yml
+
+- stage: Deploy
+  dependsOn: Build
+  jobs:
+  - template: templates/deploy-aks.yml

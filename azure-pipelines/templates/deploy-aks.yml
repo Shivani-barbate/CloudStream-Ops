@@ -1,0 +1,19 @@
+jobs:
+- deployment: DeployToAKS
+  environment: production
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: KubernetesManifest@1
+          inputs:
+            action: deploy
+            kubernetesServiceConnection: aks-service-connection
+            namespace: cloudstream-prod
+            manifests: |
+              manifests/base/api-deployment.yaml
+              manifests/base/api-service.yaml
+              manifests/base/api-hpa.yaml
+              manifests/base/kafka-statefulset.yaml
+              manifests/base/kafka-service.yaml
+              manifests/base/ingress.yaml

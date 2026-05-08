@@ -8,7 +8,7 @@ jobs:
         - task: KubernetesManifest@1
           inputs:
             action: deploy
-            kubernetesServiceConnection: cloudstream-connection
+            kubernetesServiceConnection: aks-service-connection
             namespace: cloudstream-prod
             manifests: |
               manifests/base/api-deployment.yaml

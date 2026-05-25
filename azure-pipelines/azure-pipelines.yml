@@ -5,8 +5,8 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  acrName: cloudstreamregz575vqmmnnycg
-  acrLoginServer: cloudstreamregz575vqmmnnycg.azurecr.io
+  acrName: myacrcloudstream123
+  acrLoginServer: myacrcloudstream123.azurecr.io
   imageTag: $(Build.BuildId)
 
 stages:

@@ -6,7 +6,7 @@ jobs:
       command: buildAndPush
       repository: api-service
       dockerfile: src/api-service/Dockerfile
-      containerRegistry: acr-service-connection
+      containerRegistry: azure-service-connection-new
       tags: |
         $(imageTag)
         latest

@@ -3,12 +3,12 @@ jobs:
   steps:
   - task: AzureCLI@2
     inputs:
-      azureSubscription: cloudstream-connection
+      azureSubscription: azure-service-connection-new
       scriptType: bash
       scriptLocation: inlineScript
       inlineScript: |
         az aks get-credentials \
-          --resource-group CloudStream-RG \
+          --resource-group cloudstream-rg \
           --name cloudstream-aks \
           --overwrite-existing
 

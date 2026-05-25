@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: api-service
-        image: REPLACE_ME.azurecr.io/api-service:latest
+        image: myacrcloudstream123.azurecr.io/api-service:latest
         ports:
         - containerPort: 8000
         envFrom:

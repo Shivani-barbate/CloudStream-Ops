@@ -15,9 +15,12 @@ spec:
     spec:
       containers:
       - name: api-service
-        image: REPLACE_ME.azurecr.io/api-service:latest
+        image: cloudstreamacrshivani001.azurecr.io/api-service:v2
         ports:
-        - containerPort: 8000
+        - containerPort: 3000
+        env:
+        - name: FUNCTION_URL
+          value: "https://cloudstream-order-function.azurewebsites.net/api/orderNotification"
         envFrom:
         - configMapRef:
             name: api-config
@@ -33,12 +36,12 @@ spec:
         readinessProbe:
           httpGet:
             path: /health
-            port: 8000
+            port: 3000
           initialDelaySeconds: 10
           periodSeconds: 5
         livenessProbe:
           httpGet:
             path: /health
-            port: 8000
+            port: 3000
           initialDelaySeconds: 20
           periodSeconds: 10

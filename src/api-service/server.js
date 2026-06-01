@@ -4,6 +4,8 @@ const { Kafka } = require("kafkajs");
 const app = express();
 app.use(express.json());
 
+const FUNCTION_URL = process.env.FUNCTION_URL;
+
 const kafka = new Kafka({
   clientId: "cloudstream-api",
   brokers: ["kafka.kafka.svc.cluster.local:9092"]
@@ -21,15 +23,35 @@ app.get("/health", (_, res) => {
 });
 
 app.post("/orders", async (req, res) => {
+  const orderData = req.body;
+
+  console.log("📦 Order received:", orderData);
+
+  // Send to Kafka
   await producer.send({
     topic: "orders",
     messages: [
-      { value: JSON.stringify(req.body) }
+      { value: JSON.stringify(orderData) }
     ]
   });
 
+  // Call Azure Function
+  try {
+    await fetch(FUNCTION_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(orderData)
+    });
+    console.log("✅ Azure Function called successfully");
+  } catch (error) {
+    console.error("❌ Error calling Azure Function:", error);
+  }
+
   res.status(202).json({
-    status: "queued"
+    status: "queued",
+    message: "Order received and function triggered"
   });
 });
 

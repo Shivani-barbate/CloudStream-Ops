@@ -1,44 +1,14 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: api-service
-  namespace: cloudstream-dev
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: api-service
-  template:
-    metadata:
-      labels:
-        app: api-service
-    spec:
-      containers:
-      - name: api-service
-        image: cloudstreamacrshivani001.azurecr.io/api-service:v2
-        ports:
-        - containerPort: 3000
-        envFrom:
-        - configMapRef:
-            name: api-config
-        - secretRef:
-            name: api-secret
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            cpu: "500m"
-            memory: "512Mi"
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 10
-          periodSeconds: 5
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 20
-          periodSeconds: 10
+containers:
+- name: api-service
+  image: cloudstreamacrshivani001.azurecr.io/api-service:v3
+  imagePullPolicy: Always
+  ports:
+  - containerPort: 3000
+  env:
+  - name: FUNCTION_URL
+    value: "https://cloudstream-order-function.azurewebsites.net/api/orderNotification"
+  envFrom:
+  - configMapRef:
+      name: api-config
+  - secretRef:
+      name: api-secret

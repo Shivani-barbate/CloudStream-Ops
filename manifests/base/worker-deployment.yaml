@@ -21,33 +21,14 @@ spec:
     spec:
       serviceAccountName: worker-sa
 
-      volumes:
-      - name: secrets-store
-        csi:
-          driver: secrets-store.csi.k8s.io
-          readOnly: true
-          volumeAttributes:
-            secretProviderClass: azure-kv-secrets
-
       containers:
       - name: worker-service
-        image: cloudstreamacrshivani001.azurecr.io/worker-service:v2
+        image: cloudstreamacrshivani001.azurecr.io/worker-service:v5
         imagePullPolicy: Always
 
         env:
         - name: FUNCTION_URL
           value: "https://cloudstream-order-function.azurewebsites.net/api/orderNotification"
-
-        - name: EVENTHUB_CONNECTION_STRING
-          valueFrom:
-            secretKeyRef:
-              name: eventhub-secret
-              key: EVENTHUB_CONNECTION_STRING
-
-        volumeMounts:
-        - name: secrets-store
-          mountPath: /mnt/secrets-store
-          readOnly: true
 
         resources:
           requests:

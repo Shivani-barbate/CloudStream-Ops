@@ -2,23 +2,12 @@ const { EventHubConsumerClient } = require("@azure/event-hubs");
 const axios = require("axios");
 const fs = require("fs");
 
-let connectionString;
-
-try {
-  connectionString = fs
-    .readFileSync(
-      "/mnt/secrets-store/eventhub-connection-string",
-      "utf8"
-    )
-    .trim();
-
-  console.log("Using Event Hub connection string from Key Vault");
-} catch (err) {
-  connectionString =
-    process.env.EVENTHUB_CONNECTION_STRING;
-
-  console.log("Using Event Hub connection string from Kubernetes Secret");
-}
+const connectionString = fs
+  .readFileSync(
+    "/mnt/secrets-store/eventhub-connection-string",
+    "utf8"
+  )
+  .trim();
 
 const functionUrl =
   process.env.FUNCTION_URL;

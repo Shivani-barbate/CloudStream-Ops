@@ -1,21 +1,17 @@
 const { EventHubConsumerClient } = require("@azure/event-hubs");
+const { DefaultAzureCredential } = require("@azure/identity");
 const axios = require("axios");
-const fs = require("fs");
-
-const connectionString = fs
-  .readFileSync(
-    "/mnt/secrets-store/eventhub-connection-string",
-    "utf8"
-  )
-  .trim();
 
 const functionUrl =
   process.env.FUNCTION_URL;
 
+const credential = new DefaultAzureCredential();
+
 const consumer = new EventHubConsumerClient(
   "$Default",
-  connectionString,
-  "orders"
+  "cloudstream-eh-ns.servicebus.windows.net",
+  "orders",
+  credential
 );
 
 console.log("Worker started. Listening for orders...");

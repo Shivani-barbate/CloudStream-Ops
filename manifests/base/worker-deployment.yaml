@@ -20,12 +20,18 @@ spec:
     spec:
       containers:
       - name: worker-service
-        image: cloudstreamacrshivani001.azurecr.io/worker-service:v1
+        image: cloudstreamacrshivani001.azurecr.io/worker-service:v2
         imagePullPolicy: Always
 
         env:
         - name: FUNCTION_URL
           value: "https://cloudstream-order-function.azurewebsites.net/api/orderNotification"
+
+        - name: EVENTHUB_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: eventhub-secret
+              key: EVENTHUB_CONNECTION_STRING
 
         resources:
           requests:

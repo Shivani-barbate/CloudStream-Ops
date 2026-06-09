@@ -1,22 +1,15 @@
 const express = require("express");
-const { Kafka } = require("kafkajs");
+const { EventHubProducerClient } = require("@azure/event-hubs");
 
 const app = express();
 app.use(express.json());
 
 const FUNCTION_URL = process.env.FUNCTION_URL;
 
-const kafka = new Kafka({
-  clientId: "cloudstream-api",
-  brokers: ["kafka.kafka.svc.cluster.local:9092"]
-});
-
-const producer = kafka.producer();
-
-(async () => {
-  await producer.connect();
-  console.log("Connected to Kafka");
-})();
+const producer = new EventHubProducerClient(
+  process.env.EVENTHUB_CONNECTION_STRING,
+  "orders"
+);
 
 app.get("/health", (_, res) => {
   res.send("OK");
@@ -27,15 +20,23 @@ app.post("/orders", async (req, res) => {
 
   console.log("📦 Order received:", orderData);
 
-  // Send to Kafka
-  await producer.send({
-    topic: "orders",
-    messages: [
-      { value: JSON.stringify(orderData) }
-    ]
-  });
+  try {
+    const batch = await producer.createBatch();
 
-  // Call Azure Function
+    batch.tryAdd({
+      body: orderData
+    });
+
+    await producer.sendBatch(batch);
+
+    console.log("✅ Event Hub message sent");
+  } catch (err) {
+    console.error("❌ Event Hub error:", err);
+    return res.status(500).json({
+      error: "Failed to publish event"
+    });
+  }
+
   try {
     await fetch(FUNCTION_URL, {
       method: "POST",

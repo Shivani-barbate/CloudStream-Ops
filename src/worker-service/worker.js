@@ -1,44 +1,47 @@
-const { Kafka } = require("kafkajs");
+const { EventHubConsumerClient } = require("@azure/event-hubs");
 const axios = require("axios");
 
-const kafka = new Kafka({
-  clientId: "worker-service",
-  brokers: ["kafka.kafka.svc.cluster.local:9092"]
-});
+const connectionString =
+  process.env.EVENTHUB_CONNECTION_STRING;
 
-const consumer = kafka.consumer({
-  groupId: "order-processors"
-});
+const functionUrl =
+  process.env.FUNCTION_URL;
 
-const FUNCTION_URL =
-  process.env.FUNCTION_URL ||
-  "https://cloudstream-order-function.azurewebsites.net/api/orderNotification";
+const consumer = new EventHubConsumerClient(
+  "$Default",
+  connectionString,
+  "orders"
+);
 
-async function start() {
-  await consumer.connect();
+console.log("Worker started. Listening for orders...");
 
-  await consumer.subscribe({
-    topic: "orders",
-    fromBeginning: true
-  });
-
-  console.log("Worker started. Listening for orders...");
-
-  await consumer.run({
-    eachMessage: async ({ message }) => {
+consumer.subscribe({
+  processEvents: async (events) => {
+    for (const event of events) {
       try {
-        const order = JSON.parse(message.value.toString());
+        console.log("📦 Processing order:", event.body);
 
-        console.log("📦 Processing order:", order);
+        await axios.post(
+          functionUrl,
+          event.body
+        );
 
-        await axios.post(FUNCTION_URL, order);
-
-        console.log("✅ Azure Function invoked successfully");
-      } catch (error) {
-        console.error("❌ Processing failed:", error.message);
+        console.log(
+          "✅ Azure Function invoked successfully"
+        );
+      } catch (err) {
+        console.error(
+          "❌ Processing failed:",
+          err.message
+        );
       }
     }
-  });
-}
+  },
 
-start().catch(console.error);
+  processError: async (err) => {
+    console.error(
+      "❌ Event Hub consumer error:",
+      err
+    );
+  }
+});

@@ -1,14 +1,24 @@
 containers:
 - name: api-service
-  image: cloudstreamacrshivani001.azurecr.io/api-service:v3
+  image: cloudstreamacrshivani001.azurecr.io/api-service:v4
   imagePullPolicy: Always
+
   ports:
   - containerPort: 3000
+
   env:
   - name: FUNCTION_URL
     value: "https://cloudstream-order-function.azurewebsites.net/api/orderNotification"
+
+  - name: EVENTHUB_CONNECTION_STRING
+    valueFrom:
+      secretKeyRef:
+        name: eventhub-secret
+        key: EVENTHUB_CONNECTION_STRING
+
   envFrom:
   - configMapRef:
       name: api-config
+
   - secretRef:
       name: api-secret

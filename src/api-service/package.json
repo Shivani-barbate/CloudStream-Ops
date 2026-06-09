@@ -6,7 +6,8 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.19.2",
+    "@azure/event-hubs": "^6.0.4",
+    "express": "^4.22.2",
     "kafkajs": "^2.2.4"
   }
 }

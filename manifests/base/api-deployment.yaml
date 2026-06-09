@@ -1,24 +1,52 @@
-containers:
-- name: api-service
-  image: cloudstreamacrshivani001.azurecr.io/api-service:v4
-  imagePullPolicy: Always
+apiVersion: apps/v1
+kind: Deployment
 
-  ports:
-  - containerPort: 3000
+metadata:
+  name: api-service
+  namespace: cloudstream-dev
 
-  env:
-  - name: FUNCTION_URL
-    value: "https://cloudstream-order-function.azurewebsites.net/api/orderNotification"
+spec:
+  replicas: 2
 
-  - name: EVENTHUB_CONNECTION_STRING
-    valueFrom:
-      secretKeyRef:
-        name: eventhub-secret
-        key: EVENTHUB_CONNECTION_STRING
+  selector:
+    matchLabels:
+      app: api-service
 
-  envFrom:
-  - configMapRef:
-      name: api-config
+  template:
+    metadata:
+      labels:
+        app: api-service
 
-  - secretRef:
-      name: api-secret
+    spec:
+      containers:
+      - name: api-service
+        image: cloudstreamacrshivani001.azurecr.io/api-service:v5
+        imagePullPolicy: Always
+
+        ports:
+        - containerPort: 3000
+
+        env:
+        - name: FUNCTION_URL
+          value: "https://cloudstream-order-function.azurewebsites.net/api/orderNotification"
+
+        - name: EVENTHUB_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: eventhub-secret
+              key: EVENTHUB_CONNECTION_STRING
+
+        envFrom:
+        - configMapRef:
+            name: api-config
+
+        - secretRef:
+            name: api-secret
+
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"

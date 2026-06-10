@@ -1,14 +1,19 @@
 const express = require("express");
 const { EventHubProducerClient } = require("@azure/event-hubs");
+const { DefaultAzureCredential } = require("@azure/identity");
+const axios = require("axios");
 
 const app = express();
 app.use(express.json());
 
 const FUNCTION_URL = process.env.FUNCTION_URL;
 
+const credential = new DefaultAzureCredential();
+
 const producer = new EventHubProducerClient(
-  process.env.EVENTHUB_CONNECTION_STRING,
-  "orders"
+  "cloudstream-eh-ns.servicebus.windows.net",
+  "orders",
+  credential
 );
 
 app.get("/health", (_, res) => {
@@ -30,33 +35,45 @@ app.post("/orders", async (req, res) => {
     await producer.sendBatch(batch);
 
     console.log("✅ Event Hub message sent");
+
+    try {
+      await axios.post(
+        FUNCTION_URL,
+        orderData
+      );
+
+      console.log(
+        "✅ Azure Function called successfully"
+      );
+    } catch (funcErr) {
+      console.error(
+        "❌ Azure Function call failed:",
+        funcErr.message
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Order submitted successfully"
+    });
+
   } catch (err) {
-    console.error("❌ Event Hub error:", err);
-    return res.status(500).json({
-      error: "Failed to publish event"
+    console.error(
+      "❌ Event Hub error:",
+      err
+    );
+
+    res.status(500).json({
+      success: false,
+      error: err.message
     });
   }
-
-  try {
-    await fetch(FUNCTION_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(orderData)
-    });
-
-    console.log("✅ Azure Function called successfully");
-  } catch (error) {
-    console.error("❌ Error calling Azure Function:", error);
-  }
-
-  res.status(202).json({
-    status: "queued",
-    message: "Order received and function triggered"
-  });
 });
 
-app.listen(3000, () => {
-  console.log("API running on port 3000");
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(
+    `API running on port ${PORT}`
+  );
 });

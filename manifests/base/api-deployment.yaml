@@ -16,11 +16,14 @@ spec:
     metadata:
       labels:
         app: api-service
+        azure.workload.identity/use: "true"
 
     spec:
+      serviceAccountName: api-sa
+
       containers:
       - name: api-service
-        image: cloudstreamacrshivani001.azurecr.io/api-service:v5
+        image: cloudstreamacrshivani001.azurecr.io/api-service:v6
         imagePullPolicy: Always
 
         ports:
@@ -29,12 +32,6 @@ spec:
         env:
         - name: FUNCTION_URL
           value: "https://cloudstream-order-function.azurewebsites.net/api/orderNotification"
-
-        - name: EVENTHUB_CONNECTION_STRING
-          valueFrom:
-            secretKeyRef:
-              name: eventhub-secret
-              key: EVENTHUB_CONNECTION_STRING
 
         envFrom:
         - configMapRef:
@@ -49,4 +46,4 @@ spec:
             memory: "128Mi"
           limits:
             cpu: "500m"
-            memory: "512Mi"
+            memory

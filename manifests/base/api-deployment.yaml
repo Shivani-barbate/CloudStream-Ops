@@ -30,6 +30,9 @@ spec:
         - containerPort: 3000
 
         env:
+        - name: PORT
+          value: "3000"
+
         - name: FUNCTION_URL
           value: "https://cloudstream-order-function.azurewebsites.net/api/orderNotification"
 

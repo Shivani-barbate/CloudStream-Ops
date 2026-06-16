@@ -1,25 +1,30 @@
 trigger:
-  - main
+
+* main
 
 pool:
-  vmImage: ubuntu-latest
+vmImage: ubuntu-latest
 
 variables:
-  acrName: myacrcloudstream123
-  acrLoginServer: myacrcloudstream123.azurecr.io
-  imageTag: $(Build.BuildId)
+imageTag: $(Build.BuildId)
 
 stages:
-- stage: BuildAPI
-  jobs:
-  - template: templates/build-api.yml
 
-- stage: BuildFunction
+* stage: BuildAPI
+  jobs:
+
+  * template: azure-pipelines/templates/build-api.yml
+
+* stage: BuildWorker
   dependsOn: BuildAPI
   jobs:
-  - template: templates/build-function.yml
 
-- stage: Deploy
-  dependsOn: BuildFunction
-  jobs:
-  - template: templates/deploy-aks.yml
+  * template: azure-pipelines/templates/build-worker.yml
+
+* stage: DeployDEV
+  dependsOn:
+
+  * BuildAPI
+  * BuildWorker
+    jobs:
+  * template: azure-pipelines/templates/deploy-aks.yml

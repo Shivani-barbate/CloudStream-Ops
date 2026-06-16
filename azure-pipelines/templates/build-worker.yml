@@ -1,0 +1,15 @@
+jobs:
+
+* job: BuildWorker
+
+  steps:
+
+  * task: Docker@2
+    inputs:
+    command: buildAndPush
+    repository: worker-service
+    dockerfile: src/worker-service/Dockerfile
+    containerRegistry: acr-service-connection
+    tags: |
+    $(imageTag)
+    latest

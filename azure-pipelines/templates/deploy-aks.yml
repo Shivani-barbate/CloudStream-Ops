@@ -1,32 +1,26 @@
 jobs:
-
-* job: DeployToAKS
+- job: DeployToAKS
 
   steps:
-
-  * task: AzureCLI@2
+  - task: AzureCLI@2
     inputs:
-    azureSubscription: azure-service-connection-new
-    scriptType: bash
-    scriptLocation: inlineScript
-    inlineScript: |
+      azureSubscription: azure-service-connection-new
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        az aks get-credentials \
+          --resource-group rg-cloudstream-dev \
+          --name aks-cloudstream-dev \
+          --overwrite-existing
 
-    ```
-    az aks get-credentials \
-      --resource-group rg-cloudstream-dev \
-      --name aks-cloudstream-dev \
-      --overwrite-existing
+        kubectl apply -f manifests/base/api-deployment.yaml
+        kubectl apply -f manifests/base/api-service.yaml
+        kubectl apply -f manifests/base/api-hpa.yaml
 
-    kubectl apply -f manifests/base/api-deployment.yaml
-    kubectl apply -f manifests/base/api-service.yaml
-    kubectl apply -f manifests/base/api-hpa.yaml
+        kubectl apply -f manifests/base/worker-deployment.yaml
 
-    kubectl apply -f manifests/base/worker-deployment.yaml
-    kubectl apply -f manifests/base/worker-hpa.yaml
+        kubectl rollout restart deployment/api-service \
+          -n cloudstream-dev
 
-    kubectl rollout restart deployment/api-service \
-      -n cloudstream-dev
-
-    kubectl rollout restart deployment/worker-service \
-      -n cloudstream-dev
-    ```
+        kubectl rollout restart deployment/worker-service \
+          -n cloudstream-dev

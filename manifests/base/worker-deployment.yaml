@@ -23,7 +23,7 @@ spec:
 
       containers:
       - name: worker-service
-        image: cloudstreamacrshivani001.azurecr.io/worker-service:v5
+        image: cloudstreamacrshivani001.azurecr.io/worker-service:v10
         imagePullPolicy: Always
 
         env:

@@ -12,7 +12,9 @@
   "type": "commonjs",
   "dependencies": {
     "@azure/event-hubs": "^6.0.4",
+    "@azure/eventhubs-checkpointstore-blob": "^2.0.0",
     "@azure/identity": "^4.13.1",
+    "@azure/storage-blob": "^12.32.0",
     "axios": "^1.17.0"
   }
 }

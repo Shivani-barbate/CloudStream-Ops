@@ -8,6 +8,7 @@ jobs:
       scriptType: bash
       scriptLocation: inlineScript
       inlineScript: |
+
         az aks get-credentials \
           --resource-group rg-cloudstream-dev \
           --name aks-cloudstream-dev \
@@ -19,8 +20,16 @@ jobs:
 
         kubectl apply -f manifests/base/worker-deployment.yaml
 
-        kubectl rollout restart deployment/api-service \
+        kubectl set image deployment/api-service \
+          api-service=cloudstreamacrshivani001.azurecr.io/api-service:$(Build.BuildId) \
           -n cloudstream-dev
 
-        kubectl rollout restart deployment/worker-service \
+        kubectl set image deployment/worker-service \
+          worker-service=cloudstreamacrshivani001.azurecr.io/worker-service:$(Build.BuildId) \
+          -n cloudstream-dev
+
+        kubectl rollout status deployment/api-service \
+          -n cloudstream-dev
+
+        kubectl rollout status deployment/worker-service \
           -n cloudstream-dev

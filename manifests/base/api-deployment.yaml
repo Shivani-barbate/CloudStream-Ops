@@ -23,7 +23,7 @@ spec:
 
       containers:
       - name: api-service
-        image: cloudstreamacrshivani001.azurecr.io/api-service:v8
+        image: cloudstreamacrshivani001.azurecr.io/api-service:v9
         imagePullPolicy: Always
 
         ports:

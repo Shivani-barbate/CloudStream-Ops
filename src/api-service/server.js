@@ -8,58 +8,48 @@ app.use(express.json());
 const credential = new DefaultAzureCredential();
 
 const producer = new EventHubProducerClient(
-"cloudstream-eh-ns.servicebus.windows.net",
-"orders",
-credential
+  "cloudstream-eh-ns.servicebus.windows.net",
+  "orders",
+  credential
 );
 
 app.get("/health", (_, res) => {
-res.send("OK");
+  res.send("OK");
 });
 
 app.post("/orders", async (req, res) => {
-const orderData = req.body;
+  const orderData = req.body;
 
-console.log("📦 Order received:", orderData);
+  console.log("Order received:", orderData);
 
-try {
-const batch = await producer.createBatch();
+  try {
+    const batch = await producer.createBatch();
 
-```
-batch.tryAdd({
-  body: orderData
-});
+    batch.tryAdd({
+      body: orderData
+    });
 
-await producer.sendBatch(batch);
+    await producer.sendBatch(batch);
 
-console.log("✅ Event Hub message sent");
+    console.log("Event Hub message sent");
 
-res.status(200).json({
-  success: true,
-  message: "Order submitted successfully"
-});
-```
+    res.status(200).json({
+      success: true,
+      message: "Order submitted successfully"
+    });
 
-} catch (err) {
-console.error(
-"❌ Event Hub error:",
-err
-);
+  } catch (err) {
+    console.error("Event Hub error:", err);
 
-```
-res.status(500).json({
-  success: false,
-  error: err.message
-});
-```
-
-}
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
 });
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-console.log(
-`API running on port ${PORT}`
-);
+  console.log(`API running on port ${PORT}`);
 });

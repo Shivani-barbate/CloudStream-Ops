@@ -8,6 +8,7 @@
   "dependencies": {
     "@azure/event-hubs": "^6.0.4",
     "@azure/identity": "^4.13.1",
+    "applicationinsights": "^3.15.0",
     "axios": "^1.17.0",
     "express": "^4.22.2",
     "kafkajs": "^2.2.4"

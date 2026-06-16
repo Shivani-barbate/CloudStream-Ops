@@ -1,55 +1,35 @@
-const { DefaultAzureCredential } = require("@azure/identity");
-const { BlobServiceClient } = require("@azure/storage-blob");
-const { BlobCheckpointStore } = require("@azure/eventhubs-checkpointstore-blob");
-const { EventProcessorClient } = require("@azure/event-hubs");
-const axios = require("axios");
+const appInsights = require("applicationinsights");
 
-const credential = new DefaultAzureCredential();
+appInsights
+  .setup(process.env.APPLICATIONINSIGHTS_CONNECTION_STRING)
+  .setAutoCollectRequests(true)
+  .setAutoCollectDependencies(true)
+  .setAutoCollectExceptions(true)
+  .setAutoCollectPerformance(true)
+  .start();
+
+const { EventHubConsumerClient } = require("@azure/event-hubs");
+const { DefaultAzureCredential } = require("@azure/identity");
+const axios = require("axios");
 
 const functionUrl = process.env.FUNCTION_URL;
 
-const storageAccountName = "cloudstreamcheckpointsa";
-const blobContainerName = "eventhub-checkpoints";
+const credential = new DefaultAzureCredential();
 
-const blobServiceClient = new BlobServiceClient(
-  `https://${storageAccountName}.blob.core.windows.net`,
+const consumer = new EventHubConsumerClient(
+  "$Default",
+  "cloudstream-eh-ns.servicebus.windows.net",
+  "orders",
   credential
 );
 
-const containerClient =
-  blobServiceClient.getContainerClient(
-    blobContainerName
-  );
+console.log("Worker started. Listening for orders...");
 
-const checkpointStore =
-  new BlobCheckpointStore(
-    containerClient
-  );
-
-const processor =
-  new EventProcessorClient(
-    "$Default",
-    "orders",
-    "cloudstream-eh-ns.servicebus.windows.net",
-    checkpointStore,
-    credential
-  );
-
-console.log(
-  "Worker started with Blob checkpointing..."
-);
-
-processor.subscribe({
-  processEvents: async (
-    events,
-    context
-  ) => {
+consumer.subscribe({
+  processEvents: async (events) => {
     for (const event of events) {
       try {
-        console.log(
-          "📦 Processing order:",
-          event.body
-        );
+        console.log("Processing order:", event.body);
 
         await axios.post(
           functionUrl,
@@ -57,32 +37,20 @@ processor.subscribe({
         );
 
         console.log(
-          "✅ Azure Function invoked successfully"
+          "Azure Function invoked successfully"
         );
-
-        await context.updateCheckpoint(
-          event
-        );
-
-        console.log(
-          "✅ Checkpoint updated"
-        );
-
       } catch (err) {
         console.error(
-          "❌ Processing failed:",
+          "Processing failed:",
           err.message
         );
       }
     }
   },
 
-  processError: async (
-    err,
-    context
-  ) => {
+  processError: async (err) => {
     console.error(
-      "❌ Event Processor Error:",
+      "Event Hub consumer error:",
       err
     );
   }

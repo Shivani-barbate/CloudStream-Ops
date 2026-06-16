@@ -1,6 +1,19 @@
+const appInsights = require("applicationinsights");
+
+appInsights
+  .setup(
+    process.env.APPLICATIONINSIGHTS_CONNECTION_STRING
+  )
+  .setAutoCollectRequests(true)
+  .setAutoCollectDependencies(true)
+  .setAutoCollectExceptions(true)
+  .setAutoCollectPerformance(true)
+  .start();
+
 const express = require("express");
 const { EventHubProducerClient } = require("@azure/event-hubs");
 const { DefaultAzureCredential } = require("@azure/identity");
+
 
 const app = express();
 app.use(express.json());

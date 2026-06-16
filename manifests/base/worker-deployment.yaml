@@ -23,12 +23,15 @@ spec:
 
       containers:
       - name: worker-service
-        image: cloudstreamacrshivani001.azurecr.io/worker-service:v10
+        image: cloudstreamacrshivani001.azurecr.io/worker-service:v11
         imagePullPolicy: Always
 
         env:
         - name: FUNCTION_URL
           value: "https://cloudstream-order-function.azurewebsites.net/api/orderNotification"
+
+        - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+          value: "InstrumentationKey=7a3283bd-2c1a-49b1-b9e2-93ab4f577b8f;IngestionEndpoint=https://centralindia-0.in.applicationinsights.azure.com/;LiveEndpoint=https://centralindia.livediagnostics.monitor.azure.com/;ApplicationId=9a96ee74-8a43-4542-ab31-96ab814559c9"
 
         resources:
           requests:

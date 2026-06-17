@@ -20,16 +20,8 @@ jobs:
 
         kubectl apply -f manifests/base/worker-deployment.yaml
 
-        kubectl set image deployment/api-service \
-          api-service=cloudstreamacrshivani001.azurecr.io/api-service:$(Build.BuildId) \
+        kubectl rollout restart deployment/api-service \
           -n cloudstream-dev
 
-        kubectl set image deployment/worker-service \
-          worker-service=cloudstreamacrshivani001.azurecr.io/worker-service:$(Build.BuildId) \
-          -n cloudstream-dev
-
-        kubectl rollout status deployment/api-service \
-          -n cloudstream-dev
-
-        kubectl rollout status deployment/worker-service \
+        kubectl rollout restart deployment/worker-service \
           -n cloudstream-dev

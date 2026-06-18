@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: worker-service
+  namespace: cloudstream-uat
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: worker-service
+
+  template:
+    metadata:
+      labels:
+        app: worker-service
+        azure.workload.identity/use: "true"
+
+    spec:
+      serviceAccountName: worker-sa
+
+      containers:
+      - name: worker-service
+        image: cloudstreamacrshivani001.azurecr.io/worker-service:v11
+        imagePullPolicy: Always
+
+        env:
+        - name: FUNCTION_URL
+          value: "https://cloudstream-order-function.azurewebsites.net/api/orderNotification"
+
+        - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: cloudstream-secrets
+              key: APPLICATIONINSIGHTS_CONNECTION_STRING
+
+        - name: EVENT_HUB_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: cloudstream-secrets
+              key: EVENT_HUB_CONNECTION_STRING
+
+        volumeMounts:
+        - name: secrets-store-inline
+          mountPath: /mnt/secrets-store
+          readOnly: true
+
+      volumes:
+      - name: secrets-store-inline
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: azure-kv-secrets

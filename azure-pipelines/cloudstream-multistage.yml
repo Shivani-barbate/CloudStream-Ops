@@ -68,7 +68,11 @@ stages:
               kubernetesServiceConnection: aks-service-connection
               namespace: cloudstream-uat
               manifests: |
-                manifests/uat/*.yaml
+                manifests/uat/api-deployment.yaml
+                manifests/uat/api-service.yaml
+                manifests/uat/api-hpa.yaml
+                manifests/uat/azure-kv-secrets.yaml
+                manifests/uat/worker-deployment.yaml
 
 # ==========================================
 # PROD
@@ -93,4 +97,12 @@ stages:
               kubernetesServiceConnection: aks-service-connection
               namespace: cloudstream-prod
               manifests: |
-                manifests/prod/*.yaml
+                manifests/prod/api-configmap.yaml
+                manifests/prod/api-deployment.yaml
+                manifests/prod/api-hpa.yaml
+                manifests/prod/api-sa.yaml
+                manifests/prod/api-secret.yaml
+                manifests/prod/api-service.yaml
+                manifests/prod/azure-kv-secrets.yaml
+                manifests/prod/worker-deployment.yaml
+                manifests/prod/worker-sa.yaml

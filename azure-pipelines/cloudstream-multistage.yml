@@ -13,15 +13,19 @@ stages:
 # BUILD
 # ==========================================
 - stage: Build
+  displayName: Build
+
   jobs:
 
   - job: Build_API
+    displayName: Build API Image
+
     pool:
       vmImage: ubuntu-latest
 
     steps:
     - task: Docker@2
-      displayName: Build API Image
+      displayName: Build and Push API Image
       inputs:
         command: buildAndPush
         repository: api-service
@@ -31,12 +35,14 @@ stages:
           $(imageTag)
 
   - job: Build_Worker
+    displayName: Build Worker Image
+
     pool:
       vmImage: ubuntu-latest
 
     steps:
     - task: Docker@2
-      displayName: Build Worker Image
+      displayName: Build and Push Worker Image
       inputs:
         command: buildAndPush
         repository: worker-service
@@ -46,30 +52,66 @@ stages:
           $(imageTag)
 
 # ==========================================
-# UAT
+# DEV
 # ==========================================
-- stage: UAT
+- stage: DEV
+  displayName: DEV
   dependsOn: Build
 
   jobs:
 
+  - deployment: Deploy_DEV
+    displayName: Deploy DEV
+    environment: cloudstream-dev
+
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          - checkout: self
+
+          - task: KubernetesManifest@1
+            displayName: Deploy to DEV
+            inputs:
+              action: deploy
+              kubernetesServiceConnection: aks-dev-service-connection
+              namespace: cloudstream-dev
+              manifests: |
+                manifests/base/api-configmap.yaml
+                manifests/base/api-deployment.yaml
+                manifests/base/api-hpa.yaml
+                manifests/base/api-sa.yaml
+                manifests/base/api-secret.yaml
+                manifests/base/api-service.yaml
+                manifests/base/azure-kv-secrets.yaml
+                manifests/base/worker-deployment.yaml
+
+# ==========================================
+# UAT
+# ==========================================
+- stage: UAT
+  displayName: UAT
+  dependsOn: DEV
+
+  jobs:
+
   - deployment: Deploy_UAT
+    displayName: Deploy UAT
     environment: cloudstream-uat
 
     strategy:
       runOnce:
         deploy:
-
           steps:
+
           - checkout: self
-          - script: |
-              pwd
-              find . -name "*.yaml"
-            displayName: Debug Files
+
           - task: KubernetesManifest@1
+            displayName: Deploy to UAT
             inputs:
               action: deploy
-              kubernetesServiceConnection: aks-service-connection
+              kubernetesServiceConnection: aks-uat-service-connection
               namespace: cloudstream-uat
               manifests: |
                 manifests/uat/api-deployment.yaml
@@ -82,27 +124,27 @@ stages:
 # PROD
 # ==========================================
 - stage: PROD
+  displayName: PROD
   dependsOn: UAT
 
   jobs:
 
   - deployment: Deploy_PROD
+    displayName: Deploy PROD
     environment: cloudstream-prod
 
     strategy:
       runOnce:
         deploy:
-
           steps:
+
           - checkout: self
-          - script: |
-              pwd
-              find . -name "*.yaml"
-            displayName: Debug Files
+
           - task: KubernetesManifest@1
+            displayName: Deploy to PROD
             inputs:
               action: deploy
-              kubernetesServiceConnection: aks-service-connection
+              kubernetesServiceConnection: aks-prod-service-connection
               namespace: cloudstream-prod
               manifests: |
                 manifests/prod/api-configmap.yaml

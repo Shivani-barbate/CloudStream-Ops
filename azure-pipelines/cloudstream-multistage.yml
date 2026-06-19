@@ -61,7 +61,11 @@ stages:
         deploy:
 
           steps:
-
+          - checkout: self
+          - script: |
+              pwd
+              find . -name "*.yaml"
+            displayName: Debug Files
           - task: KubernetesManifest@1
             inputs:
               action: deploy
@@ -90,7 +94,11 @@ stages:
         deploy:
 
           steps:
-
+          - checkout: self
+          - script: |
+              pwd
+              find . -name "*.yaml"
+            displayName: Debug Files
           - task: KubernetesManifest@1
             inputs:
               action: deploy

@@ -86,6 +86,8 @@ stages:
                 manifests/base/api-service.yaml
                 manifests/base/azure-kv-secrets.yaml
                 manifests/base/worker-deployment.yaml
+                manifests/base/ingress.yaml
+                
 
 # ==========================================
 # UAT
@@ -119,6 +121,7 @@ stages:
                 manifests/uat/api-hpa.yaml
                 manifests/uat/azure-kv-secrets.yaml
                 manifests/uat/worker-deployment.yaml
+                manifests/uat/ingress.yaml
 
 # ==========================================
 # PROD
@@ -156,3 +159,4 @@ stages:
                 manifests/prod/azure-kv-secrets.yaml
                 manifests/prod/worker-deployment.yaml
                 manifests/prod/worker-sa.yaml
+                manifests/prod/ingress.yaml

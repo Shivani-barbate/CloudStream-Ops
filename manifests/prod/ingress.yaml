@@ -2,13 +2,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: api-ingress
-  namespace: cloudstream-dev
+  namespace: cloudstream-prod
 
 spec:
   ingressClassName: nginx
 
   rules:
-  - host: dev-api.cloudstream.local
+  - host: api.cloudstream.local
 
     http:
       paths:

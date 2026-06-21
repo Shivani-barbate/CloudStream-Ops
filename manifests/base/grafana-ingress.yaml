@@ -10,11 +10,11 @@ spec:
 
   tls:
     - hosts:
-        - grafana.cloudstream.local
-      secretName: grafana-tls-secret
+        - grafana.shivanicloud.online
+      secretName: grafana-letsencrypt-secret
 
   rules:
-    - host: grafana.cloudstream.local
+    - host: grafana.shivanicloud.online
       http:
         paths:
           - path: /

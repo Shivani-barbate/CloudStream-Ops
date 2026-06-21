@@ -1,109 +1,93 @@
 const appInsights = require("applicationinsights");
 
 appInsights
-  .setup(process.env.APPLICATIONINSIGHTS_CONNECTION_STRING)
-  .setAutoCollectRequests(true)
-  .setAutoCollectDependencies(true)
-  .setAutoCollectExceptions(true)
-  .setAutoCollectPerformance(true)
-  .start();
+.setup(process.env.APPLICATIONINSIGHTS_CONNECTION_STRING)
+.setAutoCollectRequests(true)
+.setAutoCollectDependencies(true)
+.setAutoCollectExceptions(true)
+.setAutoCollectPerformance(true)
+.start();
 
-const { EventProcessorClient } = require("@azure/event-hubs");
-const {
-  BlobCheckpointStore
-} = require("@azure/eventhubs-checkpointstore-blob");
-const {
-  BlobServiceClient
-} = require("@azure/storage-blob");
+const { EventHubConsumerClient } = require("@azure/event-hubs");
+const { BlobCheckpointStore } = require("@azure/eventhubs-checkpointstore-blob");
+const { BlobServiceClient } = require("@azure/storage-blob");
 const { DefaultAzureCredential } = require("@azure/identity");
 const axios = require("axios");
 
-const functionUrl = process.env.FUNCTION_URL;
-
-const storageAccount =
-  process.env.STORAGE_ACCOUNT_NAME;
-
-const containerName =
-  process.env.STORAGE_CONTAINER_NAME;
-
 const credential = new DefaultAzureCredential();
 
-const blobServiceClient =
-  new BlobServiceClient(
-    `https://${storageAccount}.blob.core.windows.net`,
-    credential
-  );
+const functionUrl = process.env.FUNCTION_URL;
+const storageAccount = process.env.STORAGE_ACCOUNT_NAME;
+const containerName = process.env.STORAGE_CONTAINER_NAME;
 
-const checkpointStore =
-  new BlobCheckpointStore(
-    blobServiceClient,
-    containerName
-  );
-
-const processor =
-  new EventProcessorClient(
-    "$Default",
-    "orders",
-    "cloudstream-eh-ns.servicebus.windows.net",
-    credential,
-    checkpointStore
-  );
-
-console.log(
-  "Worker started with Blob Checkpoint Store..."
+const blobServiceClient = new BlobServiceClient(
+`https://${storageAccount}.blob.core.windows.net`,
+credential
 );
 
-processor.subscribe({
+const checkpointStore = new BlobCheckpointStore(
+blobServiceClient,
+containerName
+);
 
-  processEvents: async (
-    events,
-    context
-  ) => {
+const consumerClient = new EventHubConsumerClient(
+"$Default",
+"orders",
+"cloudstream-eh-ns.servicebus.windows.net",
+credential,
+checkpointStore
+);
 
-    for (const event of events) {
+console.log(
+"Worker started with Blob Checkpoint Store..."
+);
 
-      try {
+consumerClient.subscribe({
+processEvents: async (events, context) => {
 
-        console.log(
-          "Processing order:",
-          event.body
-        );
 
-        await axios.post(
-          functionUrl,
-          event.body
-        );
+for (const event of events) {
 
-        await context.updateCheckpoint(
-          event
-        );
+  try {
 
-        console.log(
-          "Checkpoint updated"
-        );
+    console.log(
+      "Processing order:",
+      event.body
+    );
 
-      } catch (err) {
+    await axios.post(
+      functionUrl,
+      event.body
+    );
 
-        console.error(
-          "Processing failed:",
-          err.message
-        );
+    await context.updateCheckpoint(event);
 
-      }
+    console.log(
+      "Checkpoint updated"
+    );
 
-    }
-
-  },
-
-  processError: async (
-    err
-  ) => {
+  } catch (err) {
 
     console.error(
-      "Event Processor Error:",
-      err
+      "Processing failed:",
+      err.message
     );
 
   }
 
+}
+
+
+},
+
+processError: async (err) => {
+
+
+console.error(
+  "Event Hub Consumer Error:",
+  err
+);
+
+
+}
 });

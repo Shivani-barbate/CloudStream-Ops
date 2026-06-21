@@ -1,12 +1,12 @@
 const appInsights = require("applicationinsights");
 
 appInsights
-.setup(process.env.APPLICATIONINSIGHTS_CONNECTION_STRING)
-.setAutoCollectRequests(true)
-.setAutoCollectDependencies(true)
-.setAutoCollectExceptions(true)
-.setAutoCollectPerformance(true)
-.start();
+  .setup(process.env.APPLICATIONINSIGHTS_CONNECTION_STRING)
+  .setAutoCollectRequests(true)
+  .setAutoCollectDependencies(true)
+  .setAutoCollectExceptions(true)
+  .setAutoCollectPerformance(true)
+  .start();
 
 const { EventHubConsumerClient } = require("@azure/event-hubs");
 const { BlobCheckpointStore } = require("@azure/eventhubs-checkpointstore-blob");
@@ -21,73 +21,53 @@ const storageAccount = process.env.STORAGE_ACCOUNT_NAME;
 const containerName = process.env.STORAGE_CONTAINER_NAME;
 
 const blobServiceClient = new BlobServiceClient(
-`https://${storageAccount}.blob.core.windows.net`,
-credential
+  `https://${storageAccount}.blob.core.windows.net`,
+  credential
 );
 
 const checkpointStore = new BlobCheckpointStore(
-blobServiceClient,
-containerName
+  blobServiceClient,
+  containerName
 );
 
 const consumerClient = new EventHubConsumerClient(
-"$Default",
-"orders",
-"cloudstream-eh-ns.servicebus.windows.net",
-credential,
-checkpointStore
+  "$Default",
+  "orders",
+  "cloudstream-eh-ns.servicebus.windows.net",
+  credential,
+  checkpointStore
 );
 
-console.log(
-"Worker started with Blob Checkpoint Store..."
-);
+console.log("Worker started with Blob Checkpoint Store...");
 
 consumerClient.subscribe({
-processEvents: async (events, context) => {
+  processEvents: async (events, context) => {
+    for (const event of events) {
+      try {
+        console.log("Processing order:", event.body);
 
+        await axios.post(
+          functionUrl,
+          event.body
+        );
 
-for (const event of events) {
+        await context.updateCheckpoint(event);
 
-  try {
+        console.log("Checkpoint updated");
 
-    console.log(
-      "Processing order:",
-      event.body
-    );
+      } catch (err) {
+        console.error(
+          "Processing failed:",
+          err.message
+        );
+      }
+    }
+  },
 
-    await axios.post(
-      functionUrl,
-      event.body
-    );
-
-    await context.updateCheckpoint(event);
-
-    console.log(
-      "Checkpoint updated"
-    );
-
-  } catch (err) {
-
+  processError: async (err) => {
     console.error(
-      "Processing failed:",
-      err.message
+      "Event Hub Consumer Error:",
+      err
     );
-
   }
-
-}
-
-
-},
-
-processError: async (err) => {
-
-
-console.error(
-  "Event Hub Consumer Error:",
-  err
-);
-
-
-}
 });

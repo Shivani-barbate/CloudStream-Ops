@@ -7,6 +7,12 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx
+
+  tls:
+    - hosts:
+        - grafana.cloudstream.local
+      secretName: cloudstream-tls-secret
+
   rules:
     - host: grafana.cloudstream.local
       http:

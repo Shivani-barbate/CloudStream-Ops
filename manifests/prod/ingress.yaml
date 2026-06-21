@@ -7,8 +7,13 @@ metadata:
 spec:
   ingressClassName: nginx
 
+  tls:
+  - hosts:
+    - api.shivanicloud.online
+    secretName: api-letsencrypt-secret
+
   rules:
-  - host: api.cloudstream.local
+  - host: api.shivanicloud.online
 
     http:
       paths:

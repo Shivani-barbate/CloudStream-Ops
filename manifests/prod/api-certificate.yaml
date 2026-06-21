@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: api-letsencrypt
+  namespace: cloudstream-prod
+spec:
+  secretName: api-letsencrypt-secret
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: api.shivanicloud.online
+  dnsNames:
+  - api.shivanicloud.online

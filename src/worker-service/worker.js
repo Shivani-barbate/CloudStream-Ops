@@ -8,50 +8,102 @@ appInsights
   .setAutoCollectPerformance(true)
   .start();
 
-const { EventHubConsumerClient } = require("@azure/event-hubs");
+const { EventProcessorClient } = require("@azure/event-hubs");
+const {
+  BlobCheckpointStore
+} = require("@azure/eventhubs-checkpointstore-blob");
+const {
+  BlobServiceClient
+} = require("@azure/storage-blob");
 const { DefaultAzureCredential } = require("@azure/identity");
 const axios = require("axios");
 
 const functionUrl = process.env.FUNCTION_URL;
 
+const storageAccount =
+  process.env.STORAGE_ACCOUNT_NAME;
+
+const containerName =
+  process.env.STORAGE_CONTAINER_NAME;
+
 const credential = new DefaultAzureCredential();
 
-const consumer = new EventHubConsumerClient(
-  "$Default",
-  "cloudstream-eh-ns.servicebus.windows.net",
-  "orders",
-  credential
+const blobServiceClient =
+  new BlobServiceClient(
+    `https://${storageAccount}.blob.core.windows.net`,
+    credential
+  );
+
+const checkpointStore =
+  new BlobCheckpointStore(
+    blobServiceClient,
+    containerName
+  );
+
+const processor =
+  new EventProcessorClient(
+    "$Default",
+    "orders",
+    "cloudstream-eh-ns.servicebus.windows.net",
+    credential,
+    checkpointStore
+  );
+
+console.log(
+  "Worker started with Blob Checkpoint Store..."
 );
 
-console.log("Worker started. Listening for orders...");
+processor.subscribe({
 
-consumer.subscribe({
-  processEvents: async (events) => {
+  processEvents: async (
+    events,
+    context
+  ) => {
+
     for (const event of events) {
+
       try {
-        console.log("Processing order:", event.body);
+
+        console.log(
+          "Processing order:",
+          event.body
+        );
 
         await axios.post(
           functionUrl,
           event.body
         );
 
-        console.log(
-          "Azure Function invoked successfully"
+        await context.updateCheckpoint(
+          event
         );
+
+        console.log(
+          "Checkpoint updated"
+        );
+
       } catch (err) {
+
         console.error(
           "Processing failed:",
           err.message
         );
+
       }
+
     }
+
   },
 
-  processError: async (err) => {
+  processError: async (
+    err
+  ) => {
+
     console.error(
-      "Event Hub consumer error:",
+      "Event Processor Error:",
       err
     );
+
   }
+
 });

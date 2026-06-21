@@ -11,7 +11,7 @@ spec:
   tls:
     - hosts:
         - grafana.cloudstream.local
-      secretName: cloudstream-tls-secret
+      secretName: grafana-tls-secret
 
   rules:
     - host: grafana.cloudstream.local

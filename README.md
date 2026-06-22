@@ -280,14 +280,35 @@ Implemented:
 
 ## Future Enhancements
 
-- Blue/Green Deployment
-- Canary Releases
-- Event Hub Checkpoint Storage
-- Azure Monitor Alerts
-- Cost Optimization Dashboards
-- Disaster Recovery Automation
+### Future Enhancements
+
+* Azure Monitor Managed Prometheus
+* Azure Managed Grafana
+* Event Hub Dead Letter Processing
+* Blob-based Event Hub Checkpointing
+* Canary Deployments
+* Blue-Green Deployments
+* Chaos Testing
+* Security Scanning with Trivy
+* Azure Policy for AKS Governance
+* Cost Optimization Dashboards
+
 
 ---
+### Results & Achievements
+
+* Successfully deployed a cloud-native event-driven application on Azure Kubernetes Service (AKS).
+* Implemented multi-environment deployments (DEV, UAT, PROD) using Azure DevOps multi-stage pipelines.
+* Secured application secrets using Azure Key Vault and CSI Driver integration.
+* Implemented Azure Workload Identity for secure pod-to-Azure authentication.
+* Integrated Azure Event Hub for asynchronous message processing.
+* Developed a Worker Service that consumes events and invokes Azure Functions.
+* Enabled end-to-end observability using Application Insights, Log Analytics, Prometheus, and Grafana.
+* Configured Horizontal Pod Autoscaling (HPA) for workload scalability.
+* Implemented TLS certificates using Cert-Manager and Let's Encrypt.
+* Built a production-style GitOps-ready repository structure with Infrastructure as Code and Kubernetes manifests.
+
+----
 
 ## Author
 
